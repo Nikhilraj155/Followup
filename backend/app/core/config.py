@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -9,6 +10,14 @@ class Settings(BaseSettings):
 
     # Database & Cache
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/followup_db"
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def assemble_db_connection(cls, v: str) -> str:
+        if isinstance(v, str) and v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
+
     REDIS_URL: str = "redis://localhost:6379/0"
 
     # JWT Authentication
